@@ -1,0 +1,86 @@
+syntax = "proto3";
+
+package dist.sys.monitor.v1;
+
+message CpuLoad {
+  double load_1 = 1;
+  double load_5 = 2;
+  double load_15 = 3;
+}
+
+message CpuUsage {
+  double user_pct = 1;
+  double system_pct = 2;
+  double idle_pct = 3;
+  double iowait_pct = 4;
+  double nice_pct = 5;
+  double irq_pct = 6;
+  double softirq_pct = 7;
+}
+
+message SoftIrqStats {
+  uint64 hi = 1;
+  uint64 timer = 2;
+  uint64 net_tx = 3;
+  uint64 net_rx = 4;
+  uint64 block = 5;
+  uint64 irq_poll = 6;
+  uint64 tasklet = 7;
+  uint64 sched = 8;
+  uint64 hrtimer = 9;
+  uint64 rcu = 10;
+}
+
+message MemoryStats {
+  uint64 total_bytes = 1;
+  uint64 available_bytes = 2;
+  uint64 used_bytes = 3;
+}
+
+message DiskIoStats {
+  uint64 read_bytes = 1;
+  uint64 write_bytes = 2;
+  double read_iops = 3;
+  double write_iops = 4;
+}
+
+message NetStats {
+  uint64 rx_bytes = 1;
+  uint64 tx_bytes = 2;
+  double rx_rate = 3;
+  double tx_rate = 4;
+}
+
+message MetricSample {
+  string host_id = 1;
+  uint64 timestamp_ms = 2;
+  CpuLoad cpu_load = 3;
+  CpuUsage cpu_usage = 4;
+  SoftIrqStats softirq = 5;
+  MemoryStats memory = 6;
+  DiskIoStats disk_io = 7;
+  NetStats net = 8;
+}
+
+message MetricsBatch {
+  repeated MetricSample samples = 1;
+}
+
+message Ack {
+  bool ok = 1;
+  string message = 2;
+}
+
+message BestServerRequest {
+  string scenario = 1;
+}
+
+message BestServerReply {
+  string host_id = 1;
+  double score = 2;
+}
+
+service ManagerService {
+  rpc ReportMetrics(MetricsBatch) returns (Ack);
+  rpc GetBestServer(BestServerRequest) returns (BestServerReply);
+}
